@@ -10,6 +10,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Sample.Common" Version="1.1.7" />
+    <PackageReference Include="Sample.Common" Version="1.1.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sample.Catalog.Contract\Sample.Catalog.Contract.csproj" />
   </ItemGroup>
 </Project>

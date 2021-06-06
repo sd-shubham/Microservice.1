@@ -1,4 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
+using System.Reflection;
+using GreenPipes;
+using MassTransit;
+using MassTransit.Definition;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
@@ -35,5 +40,25 @@ namespace Sample.Common.Service.DI
             });
             return services;
         }
+        public static IServiceCollection AddMassTransitAndRabbitMQ(this IServiceCollection services, IConfiguration configuration, string serviceName)
+        {
+            services.AddMassTransit(x =>
+       {
+           x.AddConsumers(Assembly.GetEntryAssembly());
+           x.UsingRabbitMq((context, configrator) =>
+           {
+               var rabittMQSettings = configuration.GetSection(nameof(RabbitMQSettings)).Get<RabbitMQSettings>();
+               configrator.Host(rabittMQSettings.Host);
+               configrator.ConfigureEndpoints(context, new KebabCaseEndpointNameFormatter(serviceName, false));
+               configrator.UseMessageRetry(retryConfigrator =>
+               {
+                   retryConfigrator.Interval(3, TimeSpan.FromMilliseconds(5));
+               });
+           });
+       });
+            services.AddMassTransitHostedService();
+            return services;
+        }
     }
+
 }
